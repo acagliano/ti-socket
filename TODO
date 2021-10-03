@@ -1,0 +1,6 @@
+I was thinking we allow up to 10 sockets open at once, each one is a struct holding "device" info for the respective backend.
+They can be an array of 10 unions of structs.
+Start enumerating the sockets at 1 (0 = error)
+Every time we call a socket_* function, all sockets have their backend "handlers" called after the primary action.
+
+If we want to add security, i can code in a basic packet filtering scheme as well that can be enabled on each socket. Lmk.
