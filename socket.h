@@ -11,16 +11,22 @@ enum _backends {
 
 /*
     # Attempts to open a socket.
-    *remote = pointer to a remote address to connect to
-    port = port number to connect to
     *backend_spec = pointer to an array of backends to try, in order of preference.
         once a backend is successfully setup, that one will be used without trying the rest
         NULL to use the default
         
     @returns a ti_socket type
  */
-ti_socket_t socket_open(const uint8_t *remote, const uint16_t port, const uint8_t *backend_spec);
+ti_socket_t socket_open(const uint8_t *backend_spec);
 
+/*
+    # Attempts to connect socket to a remote host
+    *remote = pointer to a remote address to connect to
+    port = port number to connect to
+    
+    @returns true if success, false if failure
+ */
+bool socket_connect(ti_socket_t socket, const uint8_t* host, const uint16_t port);
 
 /*
     # Attempts to write @len bytes at @data to @socket
