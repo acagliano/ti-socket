@@ -8,6 +8,7 @@
 #include <srldrvce.h>
 
 #define CEMU_CONSOLE ((char*)0xFB0000)
+#define TIMEOUT_TO_48K  48000
 typedef enum _sock_errors {
     SOCK_SUCCESS,
     SOCK_TIMEOUT,
@@ -49,36 +50,63 @@ static usb_error_t handle_usb_event(usb_event_t event, void *event_data,
     return USB_SUCCESS;
 }
 
-
 // set timeouts?
-sock_error_t socket_open(uint8_t* buf, size_t buf_size){
+#define INT_ABS_MINUS(x, y)     \
+                ((x > y) ? x - y : y - x)
+
+sock_error_t socket_open(uint8_t* buf, size_t buf_size, size_t timeout){
+    uint32_t timeout_48k = (timeout * TIMEOUT_TO_48K);
     srl_buf = buf;
     srl_buf_size = buf_size;
     if(cemu_check()) {
+        strcpy(CEMU_CONSOLE, "CEmu pipe compatibility mode enabled\n");
         cemu_mode = true;
-        strcpy(CEMU_CONSOLE, "cemu pipes detected\n");
         return SOCK_SUCCESS;
     }
     const usb_standard_descriptors_t *desc = srl_GetCDCStandardDescriptors();
     usb_error_t usb_error = usb_Init(handle_usb_event, NULL, desc, USB_DEFAULT_INIT_FLAGS);
     if(usb_error) return SOCK_BACKEND_ERROR;
+    uint32_t start_time = usb_GetCycleCounter();
     do{
         usb_HandleEvents();
-    } while(!srl_ready);
+    } while((!srl_ready) || INT_ABS_MINUS(usb_GetCycleCounter(), start_time) < timeout_48k));
     if(srl_ready) return SOCK_SUCCESS;
     return SOCK_TIMEOUT;
 }
 
-size_t socket_send(const uint8_t* data, size_t len){
-    if(cemu_mode) {
-        cemu_send(len, sizeof len);
-        cemu_send(data, len);
-        return len;
-    }
-    else {
-        srl_Write(&srl_device, len, sizeof len);
-        return srl_Write(&srl_device, data, len);
-    }
+#define SIZEOF_LEN   sizeof(size_t)
+#define SEND_TIMEOUT (1000 * 48000)
+sock_error_t serial_send(const uint8_t* data, size_t len){
+    size_t bytes_sent = 0;
+    uint32_t start_time = usb_GetCycleCounter();
+    do {
+        srl_Write(&srl_device, bytes_sent + (uint8_t*)&len, SIZEOF_LEN - bytes_sent);
+        usb_HandleEvents();
+        if(INT_ABS_MINUS(usb_GetCycleCounter(), start_time) > SEND_TIMEOUT)
+            return SOCK_TIMEOUT;
+    } while(bytes_sent < SIZEOF_LEN);
+    bytes_sent = 0;
+    do {
+        bytes_sent += srl_Write(&srl_device, &data[bytes_sent], len - bytes_sent);
+        usb_HandleEvents();
+        if(INT_ABS_MINUS(usb_GetCycleCounter(), start_time) > SEND_TIMEOUT)
+            return SOCK_TIMEOUT;
+    } while(bytes_sent < len);
+    return bytes_sent;
+}
+
+sock_error_t pipe_send(const uint8_t* data, size_t len){
+    sprintf(CEMU_CONSOLE, "sending %u bytes to CEmu pipe", len);
+    cemu_send(len, sizeof(len));
+    cemu_send(data, len);
+    return SOCK_SUCCESS;
+}
+
+sock_error_t socket_send(const uint8_t* data, size_t len){
+    if(cemu_mode)
+        return pipe_send(data, len);
+    else
+        return serial_send(data, len);
 }
 
 size_t usb_read_to_size(uint8_t* data, size_t size) {
