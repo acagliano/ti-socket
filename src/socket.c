@@ -97,7 +97,7 @@ sock_error_t serial_send(const uint8_t* data, size_t len){
         if((usb_GetCycleCounter() - start_time) > sock_timeout)
             return SOCK_TIMEOUT;
     } while(bytes_sent < len);
-    return bytes_sent;
+    return SOCK_SUCCESS;
 }
 
 sock_error_t pipe_send(const uint8_t* data, size_t len){
