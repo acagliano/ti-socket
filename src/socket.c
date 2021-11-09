@@ -1,3 +1,10 @@
+
+//
+// by Anthony Cagliano
+// an API for sending data out a virtual "socket" that is layered
+//      on top of the serial or IP driver.
+
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -62,7 +69,7 @@ sock_error_t socket_open(uint8_t* buf, size_t buf_size, size_t ms){
         cemu_mode = true;
         return SOCK_SUCCESS;
     }
-    if(timeout) sock_timeout = usb_MsToCycles(ms);
+    if(ms) sock_timeout = usb_MsToCycles(ms);
     const usb_standard_descriptors_t *desc = srl_GetCDCStandardDescriptors();
     usb_error_t usb_error = usb_Init(handle_usb_event, NULL, desc, USB_DEFAULT_INIT_FLAGS);
     if(usb_error) return SOCK_BACKEND_ERROR;
@@ -101,8 +108,8 @@ sock_error_t serial_send(const uint8_t* data, size_t len){
 }
 
 sock_error_t pipe_send(const uint8_t* data, size_t len){
-    sprintf(CEMU_CONSOLE, "sending %u bytes to CEmu pipe", len);
-    cemu_send(len, sizeof(len));
+    sprintf(CEMU_CONSOLE, "sending %u bytes to CEmu pipe\n", len);
+    cemu_send((uint8_t*)&len, sizeof(len));
     cemu_send(data, len);
     return SOCK_SUCCESS;
 }
@@ -135,7 +142,7 @@ size_t pipe_read_to_size(uint8_t* data, size_t size) {
 
 bool socket_read(uint8_t* data){
     size_t (*read_func)(uint8_t* data, size_t size) = (cemu_mode) ? pipe_read_to_size : usb_read_to_size;
-    static packet_size = 0;
+    static size_t packet_size = 0;
     if(packet_size) {
         if(read_func(data, packet_size)) {packet_size = 0; return true;}
     } else {

@@ -1,0 +1,186 @@
+	section	.text,"ax",@progbits
+	assume	adl = 1
+	section	.text,"ax",@progbits
+	public	_main
+_main:
+	ld	hl, -3084
+	call	__frameset
+	ld	hl, 1024
+	ld	de, 0
+	ld	(ix + -3), de
+	ld	de, -3078
+	lea	iy, ix + 0
+	add	iy, de
+	lea	bc, iy + 0
+	push	hl
+	ld	de, (ix + -3)
+	push	de
+	ld	de, -3081
+	lea	hl, ix + 0
+	add	hl, de
+	ld	(hl), bc
+	push	bc
+	call	_memset
+	pop	hl
+	pop	hl
+	pop	hl
+	ld	iy, -3145600
+	call	_os_ClrLCD
+	call	_os_HomeUp
+	call	_os_DrawStatusBar
+	ld	hl, 5000
+	push	hl
+	ld	hl, 2048
+	push	hl
+	ld	bc, -2054
+	lea	hl, ix + 0
+	add	hl, bc
+	push	hl
+	call	_socket_open
+	pop	de
+	pop	de
+	pop	de
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jq	nz, BB0_2
+BB0_3:
+	call	_usb_HandleEvents
+	ld	bc, -3081
+	lea	hl, ix + 0
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	call	_socket_read
+	push	hl
+	pop	de
+	pop	hl
+	push	de
+	pop	hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jq	z, BB0_6
+	push	de
+	ld	bc, -3081
+	lea	hl, ix + 0
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	ld	hl, -327680
+	push	hl
+	ld	bc, -3084
+	lea	hl, ix + 0
+	add	hl, bc
+	ld	(hl), de
+	call	_strncpy
+	pop	hl
+	pop	hl
+	pop	hl
+	ld	bc, -3084
+	lea	hl, ix + 0
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	ld	bc, -3081
+	lea	hl, ix + 0
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	call	_socket_send
+	pop	de
+	pop	de
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	ld	hl, 13
+	push	hl
+	ld	hl, L_.str.1
+	push	hl
+	ld	hl, -327680
+	push	hl
+	call	z, _memcpy
+	pop	hl
+	pop	hl
+	pop	hl
+BB0_6:
+	call	_os_GetCSC
+	cp	a, 15
+	jq	z, BB0_3
+	ld	bc, -3081
+	lea	hl, ix + 0
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	ld	hl, L_.str.2
+	push	hl
+	call	_strcpy
+	pop	hl
+	pop	hl
+	jq	BB0_8
+BB0_2:
+	ld	iy, _errors
+	ld	bc, 100
+	call	__imulu
+	push	hl
+	pop	de
+	add	iy, de
+	push	iy
+	call	_printf
+	pop	hl
+	call	_socket_close
+BB0_8:
+	call	_socket_close
+	or	a, a
+	sbc	hl, hl
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.rodata,"a",@progbits
+	private	L_.str
+L_.str:
+	db	"The dumb developer wrote a random sentence.",000o
+
+	section	.data,"aw",@progbits
+	public	_str
+_str:
+	dl	L_.str
+
+	section	.data,"aw",@progbits
+	public	_errors
+_errors:
+	db	"Success",000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o
+	db	"Timeout",000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o
+	db	"Backend Error",000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o,000o
+
+	section	.rodata,"a",@progbits
+	private	L_.str.1
+L_.str.1:
+	db	"string sent",012o,000o
+
+	section	.rodata,"a",@progbits
+	private	L_.str.2
+L_.str.2:
+	db	"",012o,000o
+
+	ident	"clang version 12.0.0 (https://github.com/jacobly0/llvm-project 170be88120e3aa88c20eea5615ba76b8f1d6c647)"
+	extern	_memset
+	extern	__Unwind_SjLj_Register
+	extern	__frameset
+	extern	_printf
+	extern	__Unwind_SjLj_Unregister
+	extern	_socket_read
+	extern	_strcpy
+	extern	__imulu
+	extern	_socket_send
+	extern	_strncpy
+	extern	_socket_open
+	extern	_os_ClrLCD
+	extern	_os_GetCSC
+	extern	_os_DrawStatusBar
+	extern	_memcpy
+	extern	_os_HomeUp
+	extern	_usb_HandleEvents
+	extern	_socket_close
