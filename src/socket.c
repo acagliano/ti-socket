@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "exposure.h"
 #include <usbdrvce.h>
@@ -28,24 +29,32 @@ bool srl_ready = false;
 bool cemu_mode = false;
 uint8_t* srl_buf = NULL;
 size_t srl_buf_size = 0;
-uint32_t sock_timeout = 1000;
+uint32_t sock_timeout;
 
 
 static usb_error_t handle_usb_event(usb_event_t event, void *event_data,
                                     usb_callback_data_t *callback_data) {
     if(event == USB_HOST_CONFIGURE_EVENT) {
+        printf("Triggered Host Event\n");
 
         /* If we already have a serial device, ignore the new one */
         if(srl_ready) return USB_SUCCESS;
 
         usb_device_t device = usb_FindDevice(NULL, NULL, USB_SKIP_HUBS);
-        if(device == NULL) return USB_SUCCESS;
+        if(device == NULL) {
+            printf("no device found\n");
+            return USB_SUCCESS;
+        }
 
         /* Initialize the serial library with the newly attached device */
-        srl_error_t error = srl_Open(&srl_device, device, srl_buf, sizeof srl_buf, SRL_INTERFACE_ANY, 9600);
-        if(error) return USB_SUCCESS;
+        srl_error_t error = srl_Open(&srl_device, device, srl_buf, srl_buf_size, SRL_INTERFACE_ANY, 9600);
+        if(error) {
+            printf("serial init error %u\n", error);
+            return USB_SUCCESS;
+        }
 
         srl_ready = true;
+        printf("serial success");
     }
 
     if(event == USB_DEVICE_DISCONNECTED_EVENT) {
@@ -92,7 +101,7 @@ sock_error_t serial_send(const uint8_t* data, size_t len){
     size_t bytes_sent = 0;
     uint32_t start_time = usb_GetCycleCounter();
     do {
-        srl_Write(&srl_device, bytes_sent + (uint8_t*)&len, SIZEOF_LEN - bytes_sent);
+        bytes_sent += srl_Write(&srl_device, bytes_sent + (uint8_t*)&len, SIZEOF_LEN - bytes_sent);
         usb_HandleEvents();
         if((usb_GetCycleCounter() - start_time) > sock_timeout)
             return SOCK_TIMEOUT;
@@ -109,7 +118,7 @@ sock_error_t serial_send(const uint8_t* data, size_t len){
 
 sock_error_t pipe_send(const uint8_t* data, size_t len){
     sprintf(CEMU_CONSOLE, "sending %u bytes to CEmu pipe\n", len);
-    cemu_send((uint8_t*)&len, sizeof(len));
+    cemu_send((uint8_t*)&len, SIZEOF_LEN);
     cemu_send(data, len);
     return SOCK_SUCCESS;
 }
@@ -133,9 +142,8 @@ size_t pipe_read_to_size(uint8_t* data, size_t size) {
 
     if(bytes_read >= size) {
         bytes_read = 0;
-        return bytes_read;
+        return true;
     }
-
     return 0;
 }
 
@@ -143,6 +151,7 @@ size_t pipe_read_to_size(uint8_t* data, size_t size) {
 bool socket_read(uint8_t* data){
     size_t (*read_func)(uint8_t* data, size_t size) = (cemu_mode) ? pipe_read_to_size : usb_read_to_size;
     static size_t packet_size = 0;
+    usb_HandleEvents();
     if(packet_size) {
         if(read_func(data, packet_size)) {packet_size = 0; return true;}
     } else {
