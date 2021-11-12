@@ -115,7 +115,7 @@ sock_error_t serial_send(const uint8_t* data, size_t len){
     usb_HandleEvents();
     bytes_sent = 0;
     do {
-        bytes_sent += srl_Write(&srl_device, bytes_sent + data, len - bytes_sent);
+        bytes_sent += srl_Write(&srl_device, &data[bytes_sent], len - bytes_sent);
         usb_HandleEvents();
         if((usb_GetCycleCounter() - start_time) > sock_timeout)
             return SOCK_TIMEOUT;
