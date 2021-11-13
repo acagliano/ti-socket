@@ -32,7 +32,6 @@ bool cemu_mode = false;
 uint8_t* srl_buf = NULL;
 size_t srl_buf_size = 0;
 uint32_t sock_timeout;
-void (error_func*)(sock_error_t);
 
 
 static usb_error_t handle_usb_event(usb_event_t event, void *event_data,
@@ -95,9 +94,6 @@ sock_error_t socket_settimeout(size_t ms) {
     return SOCK_SUCCESS;
 }
 
-void sock_seterrorhandler(void (func*)(sock_error_t)){
-    error_func = func;
-}
 
 #define SIZEOF_LEN   sizeof(size_t)
 sock_error_t serial_send(const uint8_t* data, size_t len){
@@ -115,7 +111,7 @@ sock_error_t serial_send(const uint8_t* data, size_t len){
     usb_HandleEvents();
     bytes_sent = 0;
     do {
-        bytes_sent += srl_Write(&srl_device, bytes_sent + data, len - bytes_sent);
+        bytes_sent += srl_Write(&srl_device, &data[bytes_sent], len - bytes_sent);
         usb_HandleEvents();
         if((usb_GetCycleCounter() - start_time) > sock_timeout)
             return SOCK_TIMEOUT;
