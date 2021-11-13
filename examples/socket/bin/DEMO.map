@@ -1,0 +1,110 @@
+Section          Base   Top    High   Length
+---------------- ------ ------ ------ -------
+.icon            D1A882 D1A99D           11Bh
+.init.libs       D1A99D D1A9F5            58h
+.libs            D1A9F5 D1AA1D            28h
+.init.clock      D1AA1D D1AA1D             0h
+.init.reruncheck D1AA1D D1AA1D             0h
+.init            D1AA1D D1AA3D            20h
+.fini            D1AA3D D1AA71            34h
+.text            D1AA71 D1C634          1BC3h
+.data            D1C634 D1C760           12Ch
+.rodata          D1C760 D1C844            E4h
+.init_array      000000 000000             0h
+.ctors           000000 000000             0h
+.dtors           000000 000000             0h
+.fini_array      000000 000000             0h
+.bss             D052C6 D052C6 D13FD8      0h
+.header          D1A87F D1A882             3h
+
+Label                       Value
+-------------------------   ------
+___low_bss                = D052C6
+___len_bss                = 000000
+___heaptop                = D13FD8
+___heapbot                = D052C6
+___libs                   = D1A9F5
+___init_array_count       = 000000
+___ctors_count            = 000000
+___dtors_count            = 000000
+___fini_array_count       = 000000
+__stack                   = D1A87E
+_os_DisableHomeTextBuffer = D1AA71
+_os_EnableHomeTextBuffer  = D1AA83
+_os_GetCSC                = 021D3C
+_os_ClrLCD                = 02080C
+_os_HomeUp                = 020828
+_os_DrawStatusBar         = 021A3C
+_printf                   = D1AA95
+__vsnprintf               = D1AAC3
+LJTI1_0                   = D1C760
+LJTI1_1                   = D1C77E
+__out_char                = D1BAB9
+__out_null                = D1BACB
+__atoi                    = D1BAD2
+__ntoa_long               = D1BB2A
+__ftoa                    = D1BE62
+__out_rev                 = D1C3AD
+L_.str                    = D1C7C3
+__ftoa.pow10              = D1C7C9
+L_.str.1                  = D1C7F1
+L_.str.2                  = D1C7F5
+L_.str.3                  = D1C7FA
+L_.str.4                  = D1C7FF
+__fneg                    = D1C4B7
+__frameset                = D1C4C4
+__frameset0               = D1C4D2
+__indcallhl               = D1C4DD
+_memset                   = D1C4DE
+_outchar                  = D1C4F5
+__fadd                    = 000270
+__fcmp                    = 000274
+__fdiv                    = 000278
+__fmul                    = 000288
+__fsub                    = 000290
+__ftol                    = 00027C
+__iand                    = 000134
+__idivs                   = 00013C
+__imulu                   = 000158
+__indcall                 = 00015C
+__ior                     = 000168
+__ishl                    = 000174
+__ishrs                   = 00017C
+__ishru                   = 000184
+__ixor                    = 000198
+__ladd                    = 00019C
+__land                    = 0001A4
+__lcmpu                   = 0001AC
+__lcmpzero                = 0001B0
+__ldivu                   = 0001B8
+__lmulu                   = 0001CC
+__lor                     = 0001D8
+__lshrs                   = 0001E8
+__ltof                    = 000284
+__lxor                    = 0001FC
+__setflag                 = 000218
+__ultof                   = 000280
+_strcpy                   = 0000CC
+.missingappvar            = D1C803
+.libloadname              = D1C808
+.libloadnamelen           = 000007
+.webaddress               = D1C810
+__start                   = D1AA1D
+___exithl                 = D1AA3D
+skip._exit                = D1AA3D
+skip.__Exit               = D1AA3D
+skip._abort               = D1AA3D
+_exit.sp                  = D1AA3E
+_exit.flash_wait_states   = D1AA48
+_main                     = D1C50B
+LJTI0_0                   = D1C825
+_errors                   = D1C634
+L_.str.1                  = D1C831
+L_.str.2                  = D1C834
+L_.str.3                  = D1C839
+L_.str.4                  = D1C83E
+_#socket_open             = D1A9FE
+_#socket_send             = D1AA02
+_#socket_read             = D1AA06
+_#socket_close            = D1AA0A
+_#usb_HandleEvents        = D1AA19
