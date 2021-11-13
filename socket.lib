@@ -1,6 +1,0 @@
-library	"SOCKET", 0
-	export	socket_open ; 0
-	export	socket_settimeout ; 3
-	export	socket_send ; 6
-	export	socket_read ; 9
-	export	socket_close ; 12
